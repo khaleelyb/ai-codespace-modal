@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { VibeEntry, ChatMessage, AIMode } from './types';
+import { VibeEntry, ChatMessage, AIMode } from './src/types';
 import FileTree from './src/components/FileTree';
 import Editor from './src/components/Editor';
 import ChatPanel from './src/components/ChatPanel';
