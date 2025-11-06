@@ -1,9 +1,9 @@
-
-export interface VibeFile {
+export interface VibeEntry {
   id: string;
   name: string;
   content: string;
   language: string;
+  type: 'file' | 'folder' | 'image';
 }
 
 export interface ChatMessage {
