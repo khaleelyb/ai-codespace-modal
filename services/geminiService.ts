@@ -1,5 +1,5 @@
-
 import { GoogleGenAI, Chat } from "@google/genai";
+import { VibeEntry } from '../types';
 
 const API_KEY = process.env.API_KEY;
 
@@ -11,9 +11,6 @@ const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 /**
  * Manages a chat session with Gemini, preserving conversation history.
- * @param existingChat - An optional existing chat instance.
- * @param message - The user's message.
- * @returns An object containing the updated chat instance and the model's response text.
  */
 export const runChat = async (existingChat: Chat | null, message: string): Promise<{chatInstance: Chat, response: string}> => {
   const chat = existingChat || ai.chats.create({
@@ -29,8 +26,6 @@ export const runChat = async (existingChat: Chat | null, message: string): Promi
 
 /**
  * Analyzes a code snippet for a quick overview using a fast model.
- * @param code - The code to analyze.
- * @returns A markdown-formatted analysis from the model.
  */
 export const analyzeCode = async (code: string): Promise<string> => {
   const response = await ai.models.generateContent({
@@ -47,8 +42,6 @@ ${code}
 
 /**
  * Performs complex code refactoring using the Pro model with maximum thinking budget.
- * @param code - The code to refactor.
- * @returns The refactored code block from the model.
  */
 export const refactorCodeWithThinking = async (code: string): Promise<string> => {
   const response = await ai.models.generateContent({
@@ -64,4 +57,59 @@ ${code}
     },
   });
   return response.text;
+};
+
+/**
+ * Scaffolds a project structure based on a user prompt.
+ */
+export const scaffoldProject = async (prompt: string): Promise<VibeEntry[]> => {
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-pro',
+    contents: `You are an expert software architect. Based on the following user request, generate a project structure with files and folders.
+
+Output ONLY a valid JSON array of objects with this exact structure:
+[
+  {
+    "id": "path/to/file.js",
+    "name": "file.js",
+    "content": "// File content here",
+    "language": "javascript",
+    "type": "file"
+  },
+  {
+    "id": "path/to/folder",
+    "name": "folder",
+    "content": "",
+    "language": "",
+    "type": "folder"
+  }
+]
+
+Rules:
+- For folders, id should be the full path (e.g., "src/components")
+- For files, id should be the full path including filename (e.g., "src/components/Button.js")
+- Include actual working code in the content field
+- Set language to the file extension (js, jsx, ts, tsx, css, html, etc.)
+- Create folders before files that go in them
+- Output ONLY the JSON array, no additional text or formatting
+
+User request: ${prompt}`,
+    config: {
+      thinkingConfig: { thinkingBudget: 16384 },
+    },
+  });
+
+  try {
+    // Extract JSON from response
+    const text = response.text;
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) {
+      throw new Error('No JSON array found in response');
+    }
+    const entries: VibeEntry[] = JSON.parse(jsonMatch[0]);
+    return entries;
+  } catch (error) {
+    console.error('Failed to parse scaffold response:', error);
+    throw new Error('Failed to generate project structure. Please try again.');
+  }
 };
