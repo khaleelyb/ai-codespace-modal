@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import MagicIcon from './icons/MagicIcon';
+import SparkleIcon from './icons/SparkleIcon';
 
 interface ScaffoldModalProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ const ScaffoldModal: React.FC<ScaffoldModalProps> = ({ isOpen, onClose, onScaffo
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center space-x-3">
-            <MagicIcon className="w-6 h-6 text-purple-400" />
+            <SparkleIcon className="w-6 h-6 text-purple-400" />
             <h2 className="text-xl font-bold text-slate-100">Scaffold with AI</h2>
         </div>
         <p className="text-slate-400">
